@@ -25,7 +25,7 @@
 4. **Access services:**
    - **TelemetryWatch API**: http://localhost:8080
    - **Prometheus**: http://localhost:9090
-   - **Grafana**: http://localhost:3000 (username: `admin`, password: `admin12345`)
+   - **Grafana**: http://localhost:3000 (username: `admin`, password: set via `GF_SECURITY_ADMIN_PASSWORD` or default `admin12345` for dev only)
    - **PostgreSQL**: localhost:5432
 
 5. **Test endpoints:**

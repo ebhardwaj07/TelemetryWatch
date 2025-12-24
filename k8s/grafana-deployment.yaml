@@ -20,7 +20,14 @@ spec:
         - name: GF_SECURITY_ADMIN_USER
           value: admin
         - name: GF_SECURITY_ADMIN_PASSWORD
-          value: admin12345
+          valueFrom:
+            secretKeyRef:
+              name: telemetrywatch-secrets
+              key: grafana-admin-password
+              optional: true
+        # Fallback for development (remove in production)
+        # - name: GF_SECURITY_ADMIN_PASSWORD
+        #   value: CHANGE_ME
         - name: GF_SERVER_ROOT_URL
           value: http://localhost:3000
         ports:

@@ -20,7 +20,14 @@ spec:
         - name: POSTGRES_USER
           value: telemetrywatch
         - name: POSTGRES_PASSWORD
-          value: telemetrywatch
+          valueFrom:
+            secretKeyRef:
+              name: telemetrywatch-secrets
+              key: postgres-password
+              optional: true
+        # Fallback for development (remove in production)
+        # - name: POSTGRES_PASSWORD
+        #   value: CHANGE_ME
         - name: POSTGRES_DB
           value: telemetrywatch
         ports:

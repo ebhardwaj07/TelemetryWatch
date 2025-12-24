@@ -16,6 +16,8 @@ datasources:
     url: postgresql:5432
     database: telemetrywatch
     user: telemetrywatch
+    # WARNING: Change this password in production!
+    # This should match your POSTGRES_PASSWORD
     secureJsonData:
       password: telemetrywatch
     editable: true

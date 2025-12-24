@@ -5,9 +5,9 @@ services:
     image: postgres:15-alpine
     container_name: telemetrywatch-postgres
     environment:
-      POSTGRES_USER: telemetrywatch
-      POSTGRES_PASSWORD: telemetrywatch
-      POSTGRES_DB: telemetrywatch
+      POSTGRES_USER: ${POSTGRES_USER:-telemetrywatch}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-telemetrywatch}
+      POSTGRES_DB: ${POSTGRES_DB:-telemetrywatch}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -28,7 +28,7 @@ services:
     environment:
       HOST: 0.0.0.0
       PORT: 8080
-      DATABASE_URL: postgresql://telemetrywatch:telemetrywatch@postgresql:5432/telemetrywatch
+      DATABASE_URL: ${DATABASE_URL:-postgresql://telemetrywatch:telemetrywatch@postgresql:5432/telemetrywatch}
       DATABASE_MAX_CONNECTIONS: 10
       METRICS_ENABLED: "true"
     ports:
@@ -69,8 +69,8 @@ services:
     image: grafana/grafana:latest
     container_name: telemetrywatch-grafana
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin12345
+      GF_SECURITY_ADMIN_USER: ${GF_SECURITY_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD:-CHANGE_ME}
       GF_INSTALL_PLUGINS: ""
       GF_SERVER_ROOT_URL: http://localhost:3000
     volumes:

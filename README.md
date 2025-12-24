@@ -62,10 +62,16 @@ cd TelemetryWatch
 docker-compose up -d
 ```
 
-3. Access the services:
+3. Create a `.env` file (optional, for custom passwords):
+   ```bash
+   cp env.example .env
+   # Edit .env with your passwords
+   ```
+
+4. Access the services:
    - **TelemetryWatch API**: http://localhost:8080
    - **Prometheus**: http://localhost:9090
-   - **Grafana**: http://localhost:3000 (admin/admin12345)
+   - **Grafana**: http://localhost:3000 (default: admin/admin12345 - **CHANGE IN PRODUCTION!**)
    - **PostgreSQL**: localhost:5432
 
 4. Check service health:
@@ -218,6 +224,10 @@ TelemetryWatch exposes the following Prometheus metrics:
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Security
+
+**⚠️ Important**: Default passwords are provided for development only. For production deployments, you **MUST** change all passwords and use proper secret management. See [SECURITY.md](SECURITY.md) for detailed security guidelines.
 
 ## License
 
