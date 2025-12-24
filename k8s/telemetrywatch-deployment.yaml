@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telemetrywatch
+  namespace: telemetrywatch
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: telemetrywatch
+  template:
+    metadata:
+      labels:
+        app: telemetrywatch
+    spec:
+      containers:
+      - name: telemetrywatch
+        image: telemetrywatch:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: HOST
+          value: "0.0.0.0"
+        - name: PORT
+          value: "8080"
+        - name: DATABASE_URL
+          value: "postgresql://telemetrywatch:telemetrywatch@postgresql-service:5432/telemetrywatch"
+        - name: DATABASE_MAX_CONNECTIONS
+          value: "10"
+        - name: METRICS_ENABLED
+          value: "true"
+        ports:
+        - containerPort: 8080
+          name: http
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 5
+

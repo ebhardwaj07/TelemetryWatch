@@ -1,0 +1,26 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
+    jsonData:
+      timeInterval: "15s"
+
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: postgresql:5432
+    database: telemetrywatch
+    user: telemetrywatch
+    secureJsonData:
+      password: telemetrywatch
+    editable: true
+    jsonData:
+      sslmode: disable
+      postgresVersion: 15
+      timescaledb: false
+

@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: telemetrywatch
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+      external_labels:
+        cluster: 'telemetrywatch'
+        environment: 'production'
+
+    scrape_configs:
+      - job_name: 'telemetrywatch'
+        static_configs:
+          - targets: ['telemetrywatch-service:8080']
+        metrics_path: '/metrics'
+        scrape_interval: 10s
+
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: telemetrywatch
+data:
+  datasources.yml: |
+    apiVersion: 1
+
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus-service:9090
+        isDefault: true
+        editable: true
+        jsonData:
+          timeInterval: "15s"
+
+      - name: PostgreSQL
+        type: postgres
+        access: proxy
+        url: postgresql-service:5432
+        database: telemetrywatch
+        user: telemetrywatch
+        secureJsonData:
+          password: telemetrywatch
+        editable: true
+        jsonData:
+          sslmode: disable
+          postgresVersion: 15
+          timescaledb: false
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboards
+  namespace: telemetrywatch
+data:
+  dashboards.yml: |
+    apiVersion: 1
+
+    providers:
+      - name: 'TelemetryWatch'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 10
+        allowUiUpdates: true
+        options:
+          path: /etc/grafana/provisioning/dashboards
+          foldersFromFilesStructure: true
+

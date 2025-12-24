@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  postgresql:
+    image: postgres:15-alpine
+    container_name: telemetrywatch-postgres
+    environment:
+      POSTGRES_USER: telemetrywatch
+      POSTGRES_PASSWORD: telemetrywatch
+      POSTGRES_DB: telemetrywatch
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U telemetrywatch"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - telemetrywatch-network
+
+  telemetrywatch:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: telemetrywatch-app
+    environment:
+      HOST: 0.0.0.0
+      PORT: 8080
+      DATABASE_URL: postgresql://telemetrywatch:telemetrywatch@postgresql:5432/telemetrywatch
+      DATABASE_MAX_CONNECTIONS: 10
+      METRICS_ENABLED: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - telemetrywatch-network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: telemetrywatch-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=15d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - telemetrywatch
+    networks:
+      - telemetrywatch-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: telemetrywatch-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin12345
+      GF_INSTALL_PLUGINS: ""
+      GF_SERVER_ROOT_URL: http://localhost:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./config/grafana/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./config/grafana/dashboards:/etc/grafana/provisioning/dashboards/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - postgresql
+    networks:
+      - telemetrywatch-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  telemetrywatch-network:
+    driver: bridge
+
